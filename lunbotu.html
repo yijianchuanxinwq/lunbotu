@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<title>轮播图</title>
+		<style type="text/css">
+			*{
+				padding: 0px;
+				margin: 0px;
+				text-decoration: none;
+			}
+			/*设置窗体大小*/
+			.window{
+				width: 520px;
+				height:300px;
+				border: 2px solid white;
+				margin: auto;
+				/*z-index: 222;*/
+				overflow: hidden;
+			}
+			/*依据定位实现,改变left值*/
+			.container{  /*主要作用就是定位*/
+				width: 100%;
+				height: 100%;
+				position: relative;
+			}
+			/*滚动的承载视图容器*/
+			.scroll{
+				width: 1560px;
+				height: 100%;
+				position: absolute;
+				left: 0px;
+			}
+			.box{
+				width: 520px;
+				height: 100%;
+				float: left;
+				text-align: center;
+				line-height: 300px;
+				font-size: 18px;
+				font-weight: 800;
+				color: white;
+			}
+			.box1{
+				background: red;
+			}
+			.box2{
+				background: green;
+			}
+			.box3{
+				background: blue;
+			}
+			/*使用animation动画过渡*/
+			@keyframes scroll{
+				0%   {background:red; left:0px; }
+				50%  {background:green; left:-520px;}
+				100%  {background:blue; left:-1040px;}
+			}
+			/*.scroll{
+				animation: scroll 5s;
+			}*/
+			/*左右按钮的设置*/
+			.left,
+			.right{
+				width: 30px;
+				text-align: center;
+				height: 30;
+				line-height: 30px;
+				position: absolute;
+				top: 45%;
+				border: 2px solid white;
+				border-radius: 5px;
+				color: white;
+			}
+			.left{
+				left: 20px;
+			}
+			.right{
+				right: 20px;
+			}
+			
+			/*对应点*/
+			.dian{
+				position: absolute;
+				bottom: 20px;
+				/*border: 1px solid white;*/
+				width: 100%;
+				text-align: center;
+			}
+			.dian li{
+				display: inline-block;
+				width: 10px;
+				height: 10px;
+				border: 2px solid white;
+				border-radius: 50%;
+				margin: 0px 10px;
+			}
+			.on{
+				background: lightgray;
+				box-shadow: 1px 1px 2px lightgray;
+				transform: scale(1.4);
+			}
+		</style>
+		
+	<head> 
+	<script src="http://ajax.aspnetcdn.com/ajax/jQuery/jquery-1.8.0.js"> </script> 
+	</head>
+	<body>
+		<div class="window">
+			<div class="container">
+				<!--承载轮播的容器-->
+				<div class="scroll">
+					<div class="box1 box">第一张图</div>
+					<div class="box2 box">第二张图</div>
+					<div class="box3 box">第三张图</div>
+				</div>
+				<!--左右按钮-->
+				<div class="left">左</div>
+				<div class="right">右</div>
+				<!--对应点的滑动-->
+				<ul class="dian">
+					<li class="on"></li>
+					<li></li>
+					<li></li>
+				</ul>
+			</div>
+		</div>
+	</body>
+	<script type="text/javascript">
+//		第一个:无缝衔接
+//		原理,使其首尾相连,无线循环
+//		1.使其可以自由过度滑动
+//		1.1使用定位,利用left值向左滑动
+//		var timer=setInterval(function(){
+//			$(".scroll").animate({
+//				'left':"-500px"
+//			},500,function(){
+//				$(".scroll").children(".box:first").insertAfter($(".scroll").children(".box:last"));
+//				$(".scroll").css("left", 0);
+//			})
+//		},2000)
+//		1.2清空在创建，使用位移实现,无过渡效果
+//		var left=0;
+//		var timer=setInterval(function(){
+//			left-=520;
+//			$(".scroll").css({"transform": "translateX("+left+"px)"})
+//			if(left<-1040){
+//				show();
+//				$(".scroll").css({"transform": "translateX(0px)"})
+//			}
+//		},2000)
+//		function show(){
+//			$(".scroll").empty();
+//			$(".scroll").append("<div class='box1 box'>第一张图</div>"
+//								+"<div class='box2 box'>第二张图</div>"
+//								+"<div class='box3 box'>第三张图</div>");
+//		}
+//		1.3直接使用animation动画过渡
+//		var timer=setInterval(function(){ 
+//			if(Math.floor($(".scroll").position().left)==-1040){
+//				show();
+//			}
+//		},5000)
+//		function show(){
+//			$(".container").empty();
+//			$(".container").append("<div class='scroll'>"
+//								+"<div class='box1 box'>第一张图</div>"
+//								+"<div class='box2 box'>第二张图</div>"
+//								+"<div class='box3 box'>第三张图</div>"
+//								+"</div>");
+//			$(".scroll").css({left:'0px',animation: "scroll 5s"});
+//		}
+
+//		第二个：轮播图
+//		自动轮播与左右按钮和标识点都有联系，完整的轮播图
+//			注:动画效果不完善,只是跳动的感觉
+		window.onload=function(){
+			var timer,
+				index=0;  //注意为每个点的位置
+//			1.点击点的时候对应那张图片
+			$(".dian li").on("click",function(){
+				let offset=-520
+				$(".dian li").removeClass("on");
+				$(this).addClass("on");
+				index=$(this).index();
+//				console.log(index);
+				offset*=index;
+//				console.log(offset);
+				$(".scroll").css({left:offset+'px'});
+			})
+
+//			2.自动轮播,使用计时器,左右选一个
+			function timer(){
+				leftFn();
+//				rightFn();
+			}
+			setInterval(timer,3000);
+
+//			3.清除计时器
+			function clearTimer(){
+				clearInterval(timer);
+			}
+
+//			4.向左切换，left值为负值，逐加类
+			let num=0,
+				offset=0;
+			$(".left").on("click",function(){
+				clearTimer();
+				leftFn();
+			})
+//				注意:左轮播和左滑动效果一致,点击和计时器执行一致,可以成为一个方法如下
+			function leftFn(){
+				$(".dian li").removeClass("on");
+				//当前滑动位置,根据位置判断
+				offset = parseInt($(".scroll").position().left); 
+//				向左,最后一张接到第一张之前
+				if(offset  == 0){
+					offset=-1560;
+				}
+				num=Math.abs(offset / (-520));
+				$($(".dian li")[num-1]).addClass("on");
+				offset += 520;
+				$(".scroll").css({left:offset+'px'});
+			}
+			
+//			5.向右切换,同理和向左一样
+//				5.1向右切换,left为正值,逐减类
+			$(".right").on("click",function(){
+				clearTimer();
+				rightFn();
+			})
+			
+			function rightFn(){
+				$(".dian li").removeClass("on");
+				offset = parseInt($(".scroll").position().left);
+//				向右,第一张接入到最后一张之后
+				if(offset == -1040){
+					offset = 520;
+				}
+				num=offset / (-520);
+				$($(".dian li")[num+1]).addClass("on");
+				offset -= 520;
+				$(".scroll").css({left:offset+'px'});
+			}
+			
+			
+		}
+</script>
+</html>
